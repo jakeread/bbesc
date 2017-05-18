@@ -7,17 +7,22 @@
 
 SVM::SVM(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC){
 
+  analogWriteResolution(8);
+  // 8-bit analog (pwm) write resolution // values 0-255
+  // & maching freq as per https://www.pjrc.com/teensy/td_pulse.html set in motorleg
+
   MLA = new MotorLeg(pinHiA, pinLoA); // TODO: rename to phases U V M
   MLB = new MotorLeg(pinHiB, pinLoB);
   MLC = new MotorLeg(pinHiC, pinLoC);
-  //MotorLeg MLA = new MotorLeg(pinHiA, pinLoA);
-
-  sqrt2 = sqrt(2);
-
-  Ia = 0;
-  Ib = 0;
-  Ic = 0;
   
+  Va = 0;
+  Vb = 0;
+  Vc = 0;
+  
+}
+
+void SVM::init(){
+  // does loop-starting
 }
 
 void SVM::killAll(){
@@ -31,14 +36,16 @@ void SVM::killAll(){
 void SVM::set(double theta, double duty){ // theta, in radians
 
   //crush(&duty); // ensures between 0-1 // passing AddressOf_Duty (&duty)
+  
+  //needs much work to become true svm
 
-  Ia = duty*cos(theta);
-  Ib = duty*cos(theta - (2*PI)/3);
-  Ic = duty*cos(theta + (2*PI)/3);
+  Va = duty*cos(theta);
+  Vb = duty*cos(theta - (2*PI)/3);
+  Vc = duty*cos(theta + (2*PI)/3);
 
-  MLA->set(Ia); // sets values between -1, 1
-  MLB->set(Ib);
-  MLC->set(Ic);
+  //MLA->set(Va); // sets values between -1, 1
+  //MLB->set(Vb);
+  //MLC->set(Vc);
   
   // take theta
   // does math

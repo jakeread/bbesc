@@ -10,6 +10,7 @@ class Utils{
   
   public:
   Utils();
+  void crush(double* valPtr);
   void doubleMap(double* valPtr, double fromLo, double fromHi, double toLo, double toHi);
   
 };
