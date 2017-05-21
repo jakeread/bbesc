@@ -55,39 +55,45 @@ void BLDC::loop(uint16_t posNow){
    * Set PWM's according
    */
 
-  posNow -= BLDC_OFFSET;
-  if(posNow < 0){
-    posNow += AS5047_RESOLUTION;
+  /*
+   * OFFSET and loop-back if over
+   */
+  _posNow = posNow;
+  _posNow -= BLDC_OFFSET;
+  if(_posNow < 0){
+    _posNow += AS5047_RESOLUTION;
   }
-  
-  int modulod = posNow % BLDC_MODULO;
+
+  /*
+   * Do Modulo: for splitting Encoder (0-AS5047_RESOLUTION Physical Period, into 0-BLDC_MODULO Electrical Period)
+   */
+  _modulo = _posNow % BLDC_MODULO;
 
   /*
   Serial.print("Duty: ");
   Serial.print(_duty);
   Serial.print(" Dir: ");
   Serial.print(_dir);
-  Serial.print(" Filt: ");
-  Serial.print(posNow);
+  
+  Serial.print(" posNow: ");
+  Serial.print(_posNow);
   Serial.print(" Modulo: ");
-  Serial.print(modulod);
+  Serial.println(_modulo);
   */
   
-  uint8_t comCommand;
-  uint8_t comZone;
 
-  if(modulod >= 0 && modulod < 390){
-    comZone = 0;
-  } else if (modulod >= 390 && modulod < 780){
-    comZone = 1;
-  } else if (modulod >= 780 && modulod < 1170){
-    comZone = 2;
-  } else if (modulod >= 1170 && modulod < 1560){
-    comZone = 3;
-  } else if (modulod >= 1560 && modulod < 1950){
-    comZone = 4;
-  } else if (modulod >= 1950 && modulod <= 2340){
-    comZone = 5;
+  if(_modulo >= 0 && _modulo < 390){
+    _comZone = 0;
+  } else if (_modulo >= 390 && _modulo < 780){
+    _comZone = 1;
+  } else if (_modulo >= 780 && _modulo < 1170){
+    _comZone = 2;
+  } else if (_modulo >= 1170 && _modulo < 1560){
+    _comZone = 3;
+  } else if (_modulo >= 1560 && _modulo < 1950){
+    _comZone = 4;
+  } else if (_modulo >= 1950 && _modulo <= 2340){
+    _comZone = 5;
   }
 
   /*
@@ -96,31 +102,22 @@ void BLDC::loop(uint16_t posNow){
   */
   
   if(_dir == 1){
-    comCommand = comZone + 2; // there is some falsity in this nomenclature: offset is not measured correctly atm
-    if(comCommand < 0){
-      comCommand = 5;
+    _comCommand = _comZone + 2; // there is some falsity in this nomenclature: offset is not measured correctly atm
+    if(_comCommand == 6){
+      _comCommand = 0;
     }
-    if(comCommand == 6){
-      comCommand = 0;
-    }
-    if(comCommand == 7){
-      comCommand = 1;
-    }
-    if(comCommand == 8){
-      comCommand = 2;
+    if(_comCommand == 7){
+      _comCommand = 1;
     }
   }
   
   if(_dir == 0){
-    comCommand = comZone - 2;
-    if(comCommand == -1){
-      comCommand = 5;
+    _comCommand = _comZone - 2;
+    if(_comCommand == -1){
+      _comCommand = 5;
     }
-    if(comCommand == -2){
-      comCommand = 4;
-    }
-    if(comCommand > 5){
-      comCommand = 0;
+    if(_comCommand == -2){
+      _comCommand = 4;
     }
   }
 
@@ -131,7 +128,7 @@ void BLDC::loop(uint16_t posNow){
   Serial.println(" ");
   */
   
-  commutate(comCommand);
+  commutate(_comCommand);
 
 }
 

@@ -22,8 +22,8 @@ void setup() {
 
   AS5047.init();
   
-  //BLDC_Timer.begin(BLDC_Loop, 50);        // 20kHz
-  Debug_Timer.begin(Debug_Loop, 500000);  // 10 Hz
+  BLDC_Timer.begin(BLDC_Loop, 25);        // 20kHz
+  //Debug_Timer.begin(Debug_Loop, 500000);  // 10 Hz
   
   // do two pots
   // read'em
@@ -33,11 +33,11 @@ void setup() {
 }
 
 void BLDC_Loop(){
-  AS5047.readNow();
-  AS5047.filter();
   
   BLDC.duty(map(analogRead(8), 8, 255, 28, 255));
 
+  AS5047.readNow();
+  AS5047.filter();
   /*
   Serial.print("NOW:\t");
   Serial.print(AS5047.reading);
@@ -52,10 +52,17 @@ int comPos = 0;
 
 void Debug_Loop(){
 
-  Serial.println(AS5047.reading);
+  Serial.print(""); // print 1st: i.e. at 'end' of last loop... so that spring has come out of motor
+  Serial.print(comPos % 6);
+  
+  Serial.print(", ");
+  AS5047.filter();
+  Serial.println(AS5047.filtered);
+
+  comPos ++;
+
   BLDC.duty(map(analogRead(8), 8, 255, 28, 255));
   BLDC.commutate(comPos % 6);
-  comPos ++;
   
 }
 
