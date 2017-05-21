@@ -1,14 +1,30 @@
 #include "motorleg.h"
 //#include "svm.h"
 #include "bldc.h"
+#include "encoder_as5047.h"
 
-//SVM theSVM(3,4,5,6,9,10);
-BLDC theBLDC(3,4,5,6,9,10);
-IntervalTimer BLDCTimer;
+//SVM theSVM(3,4,5,6,9,10); // THESE IN A KERNEL : YES DO IT SOON
+// GENERALLY: Need a much stronger structure... or thoughts on it
+// and nomenclature for mag fields & vectors & approximations etc... offsets / directions / modulo etc / electrical position vs. encoder position yadda
+// auto-finding offset, modulo, super critical
+BLDC BLDC(3,4,5,6,9,10);
+AS5047 AS5047;
+
+IntervalTimer BLDC_Timer;
+IntervalTimer Serial_Timer;
+
+IntervalTimer Debug_Timer;
 
 void setup() {
   pinMode(13, OUTPUT);
-  BLDCTimer.begin(BLDC, 100);
+
+  Serial.begin(115200);
+
+  AS5047.init();
+  
+  //BLDC_Timer.begin(BLDC_Loop, 50);        // 20kHz
+  Debug_Timer.begin(Debug_Loop, 500000);  // 10 Hz
+  
   // do two pots
   // read'em
   // update timer freq. for PWM
@@ -16,15 +32,42 @@ void setup() {
   // w/ a BLDC object
 }
 
-void BLDC(){
-  // BLDC loop, every 100us -> 10kHz
-  theBLDC.loop();
+void BLDC_Loop(){
+  AS5047.readNow();
+  AS5047.filter();
+  
+  BLDC.duty(map(analogRead(8), 8, 255, 28, 255));
+
+  /*
+  Serial.print("NOW:\t");
+  Serial.print(AS5047.reading);
+  Serial.print("\tFILT:\t");
+  Serial.println(AS5047.filtered);
+  */
+  
+  BLDC.loop((int)AS5047.filtered);
 }
 
+int comPos = 0;
+
+void Debug_Loop(){
+
+  Serial.println(AS5047.reading);
+  BLDC.duty(map(analogRead(8), 8, 255, 28, 255));
+  BLDC.commutate(comPos % 6);
+  comPos ++;
+  
+}
+
+void Serial_Loop(){
+  Serial.print("report: ");
+  noInterrupts();
+  Serial.println(AS5047.reading);
+  interrupts();
+}
+
+
 void loop() { // it's a time a to testa - do update loop that reads pot before each update, writes next oneSVM.set accordingly!
-  theBLDC.hz(map(analogRead(9), 0, 255, 8, 1024));
-  theBLDC.duty(map(analogRead(8), 0, 255, 28, 255));
-  delay(50);
 }
 
 /*

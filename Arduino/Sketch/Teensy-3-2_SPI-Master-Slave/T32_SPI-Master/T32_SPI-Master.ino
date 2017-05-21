@@ -5,7 +5,7 @@
 T3SPI SPI_MASTER;
 
 //The number of integers per data packet
-#define dataLength 256
+#define dataLength 1
 
 //Initialize the arrays for outgoing data
 //volatile uint8_t  data[dataLength] = {}; 
@@ -22,7 +22,7 @@ void setup(){
   Serial.begin(115200);
   
   //Begin SPI in MASTER (SCK pin, MOSI pin, MISO pin, CS pin, Active State)
-  SPI_MASTER.begin_MASTER(SCK, MOSI, MISO, CS1, CS_ActiveLOW); //CS1->Pin9
+  SPI_MASTER.begin_MASTER(SCK, MOSI, MISO, CS4, CS_ActiveLOW); //CS1->Pin9
   
   //Set the CTAR (CTARn, Frame Size, SPI Mode, Shift Mode, Clock Divider) 
   //SPI_MASTER.setCTAR(CTAR0,8,SPI_MODE0,LSB_FIRST,SPI_CLOCK_DIV2);
@@ -30,7 +30,8 @@ void setup(){
   
   //Populate data array 
   for (int i=0; i<dataLength; i++){
-    data[i]=i;}
+    data[i]=i;
+  }
 
   //Wait for Slave
   delay(5000);
@@ -43,10 +44,10 @@ void loop(){
 
   //Send n number of data packets
   for (int i=0; i<1; i++) {
-  
     //Send data (data array, data array length, CTARn, CS pin)
     //SPI_MASTER.txrx8(data, returnData, dataLength,CTAR0,CS1);}  
-    SPI_MASTER.txrx16(data, returnData, dataLength,CTAR_0,CS1);}
+    SPI_MASTER.txrx16(data, returnData, dataLength,CTAR_0,CS1);
+  }
     
   //Capture the time when transfer is done
   SPI_MASTER.timeStamp2 = micros();
@@ -61,14 +62,15 @@ void loop(){
     Serial.print(i);
     Serial.print("]: ");
     Serial.println(returnData[i]);
-    Serial.flush();}
+    Serial.flush();
+  }
 
-    //Print statistics for the previous transfer
-    SPI_MASTER.printStatistics(dataLength);
+  //Print statistics for the previous transfer
+  SPI_MASTER.printStatistics(dataLength);
   
   //Reset the packet count 
   SPI_MASTER.packetCT=0;
   
-  delay(2000);
+  delay(1000);
 }
 

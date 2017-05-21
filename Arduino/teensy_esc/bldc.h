@@ -3,7 +3,11 @@
 
 #include <Arduino.h>
 #include "motorleg.h"
+#include "encoder_as5047.h"
 
+#define BLDC_POLES 14
+#define BLDC_MODULO 2340 // resolution / poles/2
+#define BLDC_OFFSET 950 // 2120
 
 class BLDC{
 
@@ -19,8 +23,8 @@ class BLDC{
   void dir(bool dir);   // set direction for commutation
   void freq(int freq);    // set commutation freq (updates timer)
   void hz(int hz);
-  void loop();
-  void commutate();
+  void loop(uint16_t posNow);
+  void commutate(uint8_t comPos);
 
   private:
   int _duty;
