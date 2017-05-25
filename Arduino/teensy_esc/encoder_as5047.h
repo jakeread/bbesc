@@ -14,6 +14,7 @@ class AS5047 {
   void readNow(); // read 1 value
   uint16_t mostRecent();
   float filtered();
+  uint32_t filteredInt();
   T3SPI SPI_AS5047;
 
   RingBuffer Readings;
@@ -21,6 +22,8 @@ class AS5047 {
   private:
   uint8_t readingPosition;
   volatile float _filtered;
+  volatile uint32_t _filteredInt;
+  volatile uint32_t _offsetInt;
   volatile uint16_t _reading;
 
   volatile uint16_t readWord;
@@ -28,7 +31,8 @@ class AS5047 {
   volatile uint16_t readWords[2] = {};
   volatile uint16_t returnWords[2] = {};
 
-  float avgSum;
+  float avgSumFloat;
+  uint32_t avgSumInt;
 };
 
 #endif

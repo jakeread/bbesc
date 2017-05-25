@@ -4,7 +4,7 @@
 
 BLDC::BLDC(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC){
 
-  analogWriteResolution(8);
+  analogWriteResolution(LEG_PWMRES);
   // 8-bit analog (pwm) write resolution // values 0-255
   // & maching freq as per https://www.pjrc.com/teensy/td_pulse.html set in motorleg
   
@@ -51,7 +51,7 @@ void BLDC::loop(uint16_t posNow){
    * OFFSET and loop-back if over
    */
   _posNow = posNow;
-  _posNow -= AS5047_OFFSET;
+  _posNow -= AS5047_OFFSET_UP;
   if(_posNow < 0){
     _posNow += AS5047_RESOLUTION;
   }

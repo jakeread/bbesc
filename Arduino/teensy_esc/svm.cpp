@@ -8,7 +8,7 @@
 
 SVM::SVM(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC){
 
-  analogWriteResolution(8);
+  analogWriteResolution(LEG_PWMRES);
   // 8-bit analog (pwm) write resolution // values 0-255
   // & maching freq as per https://www.pjrc.com/teensy/td_pulse.html set in motorleg
 
@@ -16,7 +16,9 @@ SVM::SVM(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC)
   MLB = new MotorLeg(pinHiB, pinLoB);
   MLC = new MotorLeg(pinHiC, pinLoC);
 
-  _theta = 0;
+  _theta = 128;
+  _duty = 0;
+  _dir = 1;
 }
 
 void SVM::init(){
@@ -41,6 +43,14 @@ void SVM::duty(int duty){
   }
 }
 
+void SVM::dir(int dir){
+  if(dir < 0){
+    _dir = -1;
+  } else if (dir >= 0){
+    _dir = 1;
+  }
+}
+
 void SVM::theta(double theta){  // theta, in radians
                                 // 360 electrical degrees resoltion is enough?
   if(theta >= 0 && theta <= 2*PI){
@@ -60,7 +70,21 @@ void SVM::assert(){
 
 void SVM::commutate(double rads){ // com in -> rads
   _theta += rads;
-  if(_theta > TWO_PI){
+  if(_theta >= TWO_PI){
+    _theta -= TWO_PI;
+  } else if (_theta < 0){
+    _theta += TWO_PI;
+  }
+  this->assert();
+}
+
+double SVM::getTheta(){
+  return _theta;
+}
+
+void SVM::loop(uint32_t pos){
+  _theta = (pos % MOTOR_MODULO) * POS_TO_THETA + _dir*PHASE_ADVANCE;
+  if(_theta >= TWO_PI){
     _theta -= TWO_PI;
   } else if (_theta < 0){
     _theta += TWO_PI;

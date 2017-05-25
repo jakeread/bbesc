@@ -15,8 +15,8 @@ MotorLeg::MotorLeg(int pinHi, int pinLo){
  * set function should be hella fast
  */
 
-void MotorLeg::set(int duty, int dir){  // duty 0 - 255 : value checks happen outside of this f'n!
-                                        // dir 0, 1
+void MotorLeg::set(uint8_t duty, uint8_t dir){  // duty 0 - 255 : value checks happen outside of this f'n!
+                                        // dir 0, 1  
   if(dir > 0){ // 'electric direction' i.e. open-to-lo or open-to-hi ... never both
     analogWrite(_pinHi, duty);
     analogWrite(_pinLo, 0);
@@ -31,13 +31,27 @@ void MotorLeg::set(int duty, int dir){  // duty 0 - 255 : value checks happen ou
 
 void MotorLeg::setSVM(double dutyDir){ // -255 -> 255 (val & direction)
   if(dutyDir > 0){
-    analogWrite(_pinHi, (int)dutyDir);
-    analogWrite(_pinLo, 0);
+    _dir = 1;
+    _duty = map(dutyDir, 0, 255, LEG_MINPWM, 255);
   } else if(dutyDir < 0){
-    analogWrite(_pinHi, 0);
-    analogWrite(_pinLo, -(int)dutyDir);
+    _dir = 0;
+    _duty = map(dutyDir, -255, 0, 255, LEG_MINPWM);
   } else {
     this->kill();
+  }
+  this->assert();
+}
+
+void MotorLeg::assert(){
+  if(_dir > 0){ // 'electric direction' i.e. open-to-lo or open-to-hi ... never both
+    analogWrite(_pinHi, _duty);
+    analogWrite(_pinLo, 0);
+  } else if(_dir == 0){
+    analogWrite(_pinHi, 0);
+    analogWrite(_pinLo, _duty);
+  } else {
+    analogWrite(_pinHi, 0);
+    analogWrite(_pinLo, 0);
   }
 }
 

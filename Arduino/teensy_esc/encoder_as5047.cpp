@@ -19,7 +19,8 @@ void AS5047::init(){
 
   readingPosition = 0;
 
-  avgSum = 0;
+  avgSumFloat = 0;
+  avgSumInt = 0;
   
 }
 
@@ -30,7 +31,11 @@ void AS5047::readNow(){
   _reading = returnWords[1] << 2;
   _reading /= 4;
   
-  Readings.push(_reading); // 1st is wake-up
+  #if AS5047_REV
+    Readings.push(AS5047_RESOLUTION - _reading);
+  #else
+    Readings.push(_reading);
+  #endif
 }
 
 uint16_t AS5047::mostRecent(){
@@ -38,13 +43,31 @@ uint16_t AS5047::mostRecent(){
 }
 
 float AS5047::filtered(){
+  avgSumFloat = 0;
   noInterrupts();
   for(int i = 0; i < AS5047_AVERAGING; i++){
-    avgSum += Readings.get(-i);
+    avgSumFloat += Readings.get(-i);
   }
   interrupts();
-  _filtered = avgSum / AS5047_AVERAGING;
-  avgSum = 0;
+  _filtered = avgSumFloat / AS5047_AVERAGING;
   return _filtered;
+}
+
+uint32_t AS5047::filteredInt(){
+  avgSumInt = 0;
+  noInterrupts();
+  for(int i = 0; i < AS5047_AVERAGING; i++){
+    avgSumInt += Readings.get(-i);
+  }
+  interrupts();
+  
+  _filteredInt = avgSumInt / AS5047_AVERAGING;
+  
+  _offsetInt = _filteredInt + AS5047_OFFSET_UP;
+  if(_offsetInt > AS5047_RESOLUTION){
+    _offsetInt -= MOTOR_MODULO;
+  }
+  
+  return _offsetInt;
 }
 

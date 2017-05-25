@@ -14,6 +14,8 @@ SVM TSVM(3, 4, 5, 6, 9, 10); // THESE IN A KERNEL : YES DO IT SOON
 
 IntervalTimer AS5047_Timer;
 
+IntervalTimer SVM_Timer;
+
 //IntervalTimer BLDC_Timer;
 
 //IntervalTimer HZ_Timer;
@@ -27,22 +29,70 @@ void setup() {
   Serial.begin(115200);
 
   TAS5047.init();
+  
   AS5047_Timer.begin(AS5047_Loop, 1000000/AS5047_LOOP_HZ); 
-  //BLDC_Timer.begin(BLDC_Loop, 25);       
-  //HZ_Timer.begin(HZ_Loop_SVM, 25);
-  Debug_Timer.begin(Debug_Loop, 1000000/DEBUG_LOOP_HZ); 
+  SVM_Timer.begin(SVM_Loop, 1000000/SVM_LOOP_HZ);
+  //BLDC_Timer.begin(BLDC_Loop, 1000000/BLDC_LOOP_HZ);       
+  //HZ_Timer.begin(HZ_Loop_SVM, 1000000/HZ_LOOP_HZ);
+  //Debug_Timer.begin(Debug_Loop, 1000000/DEBUG_LOOP_HZ); 
 }
 
 // ------------------------------------------------------- AS5047 LOOP
 
 void AS5047_Loop(){
- TAS5047.readNow();
+  TAS5047.readNow();
+}
+
+// ------------------------------------------------------- SVM Loop
+int controlInput = 0;
+
+void SVM_Loop(){
+  digitalWrite(13, !digitalRead(13));
+  
+  controlInput = analogRead(9);
+
+  if (controlInput < 512) {
+    TSVM.dir(-1);
+    TSVM.duty(map(controlInput, 512, 0, 0, 255));
+  } else if (controlInput >= 512) {
+    TSVM.dir(1);
+    TSVM.duty(map(controlInput, 512, 1023, 0, 255));
+  }
+  TSVM.loop(TAS5047.filteredInt());
 }
 
 // ------------------------------------------------------- SVM Debug Loop
+int cycleCounter = 0;
+int filteredKeeper = 0;
+double thetaKeeper = 0;
 
 void Debug_Loop(){
-  Serial.println(TAS5047.filtered());
+  digitalWrite(13, !digitalRead(13));
+
+  if(cycleCounter % 12 == 0){
+    filteredKeeper = TAS5047.filteredInt();
+    thetaKeeper = TSVM.getTheta();
+    
+    Serial.print("filt:\t");
+    Serial.print(filteredKeeper);
+    Serial.print("\tfiltModulo:\t");
+    Serial.print(filteredKeeper % MOTOR_MODULO);
+    Serial.print("\ttheta:\t");
+    Serial.println(thetaKeeper);
+  }
+  
+  TSVM.commutate(PI/24);
+  TSVM.duty(map(analogRead(9), 0, 1024, 8, 255));
+  TSVM.assert();
+  
+  cycleCounter ++;
+  
+  
+  // u kno the modulo
+  // do modulo, print vals
+  // avg all 0-com-cycle vals for 0-point
+  // this is 'where it is' when encoder,
+  // ++ // -- 90deg (pi/2 rads) (or less, for safety, #define a PHASE_ADVANCE) from this for commutate
 }
 
 // -------------------------------------------------------- BLDC LOOP

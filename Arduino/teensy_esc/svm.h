@@ -17,10 +17,13 @@ class SVM{
   void killAll(); // shut'r down
 
   void duty(int duty); // duty cycle (sets pwm)
+  void dir(int dir); // sets dir
   void theta(double theta); // 0-360, where do we want the mag vector to point, at what duty cycle?
   void assert();
   void commutate(double rads); // steps-from-current-angle to take, set
+  double getTheta();
 
+  void loop(uint32_t pos);
 
   MotorLeg* MLA;
   MotorLeg* MLB;
@@ -29,6 +32,7 @@ class SVM{
   private:
   double sqrt2;
   int _duty;
+  int _dir;
   double _theta;
   
   
