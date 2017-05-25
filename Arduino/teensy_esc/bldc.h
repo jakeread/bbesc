@@ -4,10 +4,8 @@
 #include <Arduino.h>
 #include "motorleg.h"
 #include "encoder_as5047.h"
+#include "config.h"
 
-#define BLDC_POLES 14
-#define BLDC_MODULO 2340 // resolution / poles/2
-#define BLDC_OFFSET 6663 // 6858 - 195 (offset - 1/2 switch phase)
 
 class BLDC{
 
@@ -22,7 +20,6 @@ class BLDC{
   void duty(int duty);  // set rms pwm val
   void dir(bool dir);   // set direction for commutation
   void freq(int freq);    // set commutation freq (updates timer)
-  void hz(int hz);
   void loop(uint16_t posNow);
   void commutate(uint8_t comPos);
 

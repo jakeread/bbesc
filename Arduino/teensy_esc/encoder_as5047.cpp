@@ -24,27 +24,27 @@ void AS5047::init(){
 }
 
 void AS5047::readNow(){
-  
+  // TODO: check parity bit, that readings make sense, etc
   SPI_AS5047.txrx16(readWords, returnWords, 2, CTAR_0, CS4);
 
-  reading = returnWords[1] << 2;
-  reading /= 4;
+  _reading = returnWords[1] << 2;
+  _reading /= 4;
   
-  Readings.push(reading); // 1st is wake-up
+  Readings.push(_reading); // 1st is wake-up
 }
 
-void AS5047::filter(){
+uint16_t AS5047::mostRecent(){
+  return _reading;
+}
+
+float AS5047::filtered(){
+  noInterrupts();
   for(int i = 0; i < AS5047_AVERAGING; i++){
-    /*
-    Serial.print("IT: ");
-    Serial.print(-i);
-    Serial.print(" ");
-    Serial.print(Readings.get(-i));
-    Serial.print(" ");
-    */
-    avgSum += Readings.get(-i); // ringbuffer past / over end?
+    avgSum += Readings.get(-i);
   }
-  filtered = avgSum / AS5047_AVERAGING;
+  interrupts();
+  _filtered = avgSum / AS5047_AVERAGING;
   avgSum = 0;
+  return _filtered;
 }
 

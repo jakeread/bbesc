@@ -6,6 +6,7 @@
 #define MOTORLEG_H
 
 #include <Arduino.h>
+#include "config.h"
 
 class MotorLeg{
   
@@ -13,6 +14,7 @@ class MotorLeg{
   MotorLeg(int pinHi, int pinLo); // constructor
   //~MotorLeg(); // destructor, should have, don't
   void set(int duty, int dir); // val, -255 <-> 255 (duty cycle, direction)
+  void setSVM(double dutyDir);
   void kill();
 
   private:

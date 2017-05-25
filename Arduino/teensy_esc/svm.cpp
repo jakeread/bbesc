@@ -4,6 +4,7 @@
 
 #include "motorleg.h"
 #include "svm.h"
+#include "trig.h"
 
 SVM::SVM(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC){
 
@@ -14,11 +15,8 @@ SVM::SVM(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC)
   MLA = new MotorLeg(pinHiA, pinLoA); // TODO: rename to phases U V M
   MLB = new MotorLeg(pinHiB, pinLoB);
   MLC = new MotorLeg(pinHiC, pinLoC);
-  
-  Va = 0;
-  Vb = 0;
-  Vc = 0;
-  
+
+  _theta = 0;
 }
 
 void SVM::init(){
@@ -33,32 +31,41 @@ void SVM::killAll(){
   
 }
 
-void SVM::set(double theta, double duty){ // theta, in radians
-
-  //crush(&duty); // ensures between 0-1 // passing AddressOf_Duty (&duty)
-  
-  //needs much work to become true svm
-
-  Va = duty*cos(theta);
-  Vb = duty*cos(theta - (2*PI)/3);
-  Vc = duty*cos(theta + (2*PI)/3);
-
-  //MLA->set(Va); // sets values between -1, 1
-  //MLB->set(Vb);
-  //MLC->set(Vc);
-  
-  // take theta
-  // does math
-  // sets MLA, MLB, MLC
-  
+void SVM::duty(int duty){
+  if(duty >= 0 && duty <= 255){
+    _duty = duty;
+  } else if (duty > 255){
+    _duty = 255;
+  } else if (duty < 0){
+    _duty = 0;
+  }
 }
 
-void SVM::crush(double* valPtr){
-  if(*valPtr > 1){ *valPtr = 1; } // resolving valPtr pointer to value
-  if(*valPtr < 0){ *valPtr = 0; }
+void SVM::theta(double theta){  // theta, in radians
+                                // 360 electrical degrees resoltion is enough?
+  if(theta >= 0 && theta <= 2*PI){
+    _theta = theta;
+  } else if (theta < 0){
+    _theta = 0;
+  } else if (theta > 2*PI){
+    _theta = 2*PI;
+  }
 }
 
-void SVM::doubleMap(double* valPtr, double fromLo, double fromHi, double toLo, double toHi){
-  // maths
-  *valPtr = (*valPtr-fromLo) * (toHi - toLo) / (fromHi - fromLo) + toLo;
+void SVM::assert(){
+  MLA->setSVM(_duty*cos(_theta)); // sets values between 
+  MLB->setSVM(_duty*cos(_theta - (TWO_PI)/3));
+  MLC->setSVM(_duty*cos(_theta + (TWO_PI)/3));
 }
+
+void SVM::commutate(double rads){ // com in -> rads
+  _theta += rads;
+  if(_theta > TWO_PI){
+    _theta -= TWO_PI;
+  } else if (_theta < 0){
+    _theta += TWO_PI;
+  }
+  this->assert();
+}
+
+

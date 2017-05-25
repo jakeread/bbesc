@@ -11,8 +11,7 @@
 #define RINGBUFFER_H
 
 #include <Arduino.h>
-
-#define RBUF_LENGTH 256
+#include "config.h"
 
 class RingBuffer {
   

@@ -1,7 +1,6 @@
 // does straightforward BLDC commutation
 
 #include "bldc.h"
-#define MAXCOMM 1000000
 
 BLDC::BLDC(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC){
 
@@ -39,13 +38,6 @@ void BLDC::freq(int freq){
   // else update timer
 }
 
-void BLDC::hz(int hz){
-  if(hz){ // catch 0's
-    _freq = 1000000/hz;
-  } else {
-    _freq = MAXCOMM;
-  }
-}
 
 void BLDC::loop(uint16_t posNow){
   /*
@@ -59,7 +51,7 @@ void BLDC::loop(uint16_t posNow){
    * OFFSET and loop-back if over
    */
   _posNow = posNow;
-  _posNow -= BLDC_OFFSET;
+  _posNow -= AS5047_OFFSET;
   if(_posNow < 0){
     _posNow += AS5047_RESOLUTION;
   }
@@ -67,7 +59,7 @@ void BLDC::loop(uint16_t posNow){
   /*
    * Do Modulo: for splitting Encoder (0-AS5047_RESOLUTION Physical Period, into 0-BLDC_MODULO Electrical Period)
    */
-  _modulo = _posNow % BLDC_MODULO;
+  _modulo = _posNow % MOTOR_MODULO;
 
   /*
   Serial.print("Duty: ");
@@ -80,19 +72,22 @@ void BLDC::loop(uint16_t posNow){
   Serial.print(" Modulo: ");
   Serial.println(_modulo);
   */
-  
 
-  if(_modulo >= 0 && _modulo < 390){
+  /* ENTER CONFIG
+   *  Needs to update zone-values per pole-number
+   */
+
+  if(_modulo >= 0 && _modulo < 248){
     _comZone = 0;
-  } else if (_modulo >= 390 && _modulo < 780){
+  } else if (_modulo >= 248 && _modulo < 496){
     _comZone = 1;
-  } else if (_modulo >= 780 && _modulo < 1170){
+  } else if (_modulo >= 496 && _modulo < 745){
     _comZone = 2;
-  } else if (_modulo >= 1170 && _modulo < 1560){
+  } else if (_modulo >= 745 && _modulo < 993){
     _comZone = 3;
-  } else if (_modulo >= 1560 && _modulo < 1950){
+  } else if (_modulo >= 993 && _modulo < 1241){
     _comZone = 4;
-  } else if (_modulo >= 1950 && _modulo <= 2340){
+  } else if (_modulo >= 1241 && _modulo <= 1489){
     _comZone = 5;
   }
 
