@@ -781,7 +781,7 @@ F 3 "" H 4800 8150 60  0001 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L LED D5
+L LED-RESCUE-bbesc_kiCad D5
 U 1 1 591AB647
 P 5800 8400
 F 0 "D5" H 5800 8500 50  0000 C CNN
@@ -814,7 +814,7 @@ F 3 "" H 6250 8400 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L LED D4
+L LED-RESCUE-bbesc_kiCad D4
 U 1 1 591B0D3D
 P 3500 7700
 F 0 "D4" H 3500 7800 50  0000 C CNN

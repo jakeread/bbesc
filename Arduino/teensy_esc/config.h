@@ -12,8 +12,7 @@
 
 #define RBUF_LENGTH 256
 
-#define AS5047_OFFSET_UP    219     // MT5208: 6663 = 6858 - 195 (offset - 1/2 switch phase)
-#define AS5047_OFFSET_DOWN  1270
+#define AS5047_OFFSET_UP    119     // MT5208: 6663 = 6858 - 195 (offset - 1/2 switch phase)
 #define AS5047_REV          TRUE          // set TRUE to reverse values, 0 to retain original
 
 
@@ -33,6 +32,7 @@
 
 #define AS5047_LOOP_HZ      90000
 #define SVM_LOOP_HZ         30000
+#define HZ_LOOP_HZ          30000
 #define DEBUG_LOOP_HZ       10
 
 // SVM

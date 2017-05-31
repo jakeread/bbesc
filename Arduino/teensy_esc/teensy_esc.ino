@@ -20,7 +20,7 @@ IntervalTimer SVM_Timer;
 
 //IntervalTimer HZ_Timer;
 
-IntervalTimer Debug_Timer;
+//IntervalTimer Debug_Timer;
 
 
 void setup() {
@@ -168,7 +168,8 @@ void HZ_Loop_BLDC() {
 }
 */
 // --------------------------------------------------------- FIN HZ UPDATE LOOP
-/*
+// --------------------------------------------------------- HZ SVM UPDATE LOOP
+
 unsigned long nextFlip;
 unsigned long period;
 
@@ -181,7 +182,7 @@ void HZ_Loop_SVM() {
     nextFlip = micros() + period;
   }
 }
-*/
+
 void loop() { 
 }
 
