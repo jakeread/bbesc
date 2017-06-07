@@ -30,13 +30,36 @@ void AS5047::readNow(){
 
   _reading = returnWords[1] << 2;
   _reading /= 4;
+
+  _pardCheckBits = returnWords[1] << 1;
+  _pardCheckBits /= 2;                  // if this # is even, _pardBitRx should be 0, if odd, 1
+  _pardBitRx = returnWords[1] & 0x0001; // & acts like a 'mask' // https://en.wikipedia.org/wiki/Bitwise_operations_in_C
+  
+  if((_pardCheckBits - _pardBitRx)%2){
+    _errBit = 1;
+    Serial.println("ERROR: AS5047 Parity"); // something will catch this...
+  } else {
+    _errBit = 0;
+  }
+
+  /*
+  Serial.print("returnWords[1]: ");
+  Serial.print(returnWords[1]);
+  Serial.print("\treturn << 2: ");
+  Serial.print(_reading);
+  Serial.print("\tparityCheckBits: ");
+  Serial.print(_pardCheckBits);
+  Serial.print("\tparity: ");
+  Serial.print(_pardBitRx);
+  Serial.print("\terr: ");
+  Serial.println(_errBit);
+  */
   
   #if AS5047_REV
     Readings.push(AS5047_RESOLUTION - _reading);
   #else
     Readings.push(_reading);
   #endif
-
 }
 
 uint16_t AS5047::mostRecent(){

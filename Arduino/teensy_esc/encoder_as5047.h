@@ -25,6 +25,9 @@ class AS5047 {
   volatile uint32_t _filteredInt;
   volatile uint32_t _offsetInt;
   volatile uint16_t _reading;
+  volatile uint16_t _pardCheckBits;
+  volatile uint16_t _pardBitRx;
+  volatile uint16_t _errBit;
 
   volatile uint16_t readWord;
   volatile uint16_t noOpWord;

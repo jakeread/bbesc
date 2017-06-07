@@ -30,7 +30,7 @@
 
 // LOOP SPEEDS
 
-#define AS5047_LOOP_HZ              10000
+#define AS5047_LOOP_HZ              60000
 #define SVM_LOOP_HZ                 30000
 #define DEBUG_LOOP_HZ               3000
 // SVM

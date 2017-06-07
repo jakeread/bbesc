@@ -100,7 +100,7 @@ int immediateReading = 0;
 void Debug_Loop(){
   digitalWrite(13, !digitalRead(13));
 
-  if(cycleCounter % 48 == 0){
+  if(cycleCounter % 12 == 0){
 
     noInterrupts();
     filteredKeeper = TAS5047.filteredInt();
@@ -108,27 +108,27 @@ void Debug_Loop(){
     immediateReading = TAS5047  .mostRecent();
     interrupts();
     
-    Serial.print("filt:\t");
+    Serial.print("F:\t");
     Serial.print(filteredKeeper);
-    Serial.print("\timmediate:\t");
+    Serial.print("\tI:\t");
     Serial.print(immediateReading);
-    Serial.print("\tfiltModulo:\t");
+    Serial.print("\tFM:\t");
     Serial.print(filteredKeeper % MOTOR_MODULO);
     
-    Serial.print("\ttheta:\t");
+    Serial.print("\tT:\t");
     Serial.print(thetaKeeper);
 
-    Serial.print("\tA: ");
+    Serial.print("\tAV: ");
     Serial.print(analogRead(17));
-    Serial.print(", ");
+    Serial.print("\tAA: ");
     Serial.print(analogRead(21));
-    Serial.print("\tB: ");
+    Serial.print("\tBV: ");
     Serial.print(analogRead(18));
-    Serial.print(", ");
+    Serial.print("\tBA: ");
     Serial.print(analogRead(22));
-    Serial.print("\tC: ");
+    Serial.print("\tCV: ");
     Serial.print(analogRead(19));
-    Serial.print(", ");
+    Serial.print("\tCA: ");
     Serial.print(analogRead(23));
     /*
     Serial.print("\tsetValA:\t");
