@@ -9,7 +9,7 @@ AS5047::AS5047(){
 void AS5047::init(){
   
   SPI_AS5047.begin_MASTER(ALT_SCK, ALT_MOSI, ALT_MISO, CS4, CS_ActiveLOW);
-  SPI_AS5047.setCTAR(CTAR_0, 16, SPI_MODE1, LSB_FIRST, SPI_CLOCK_DIV8);
+  SPI_AS5047.setCTAR(CTAR_0, 16, SPI_MODE1, LSB_FIRST, SPI_CLOCK_DIV8); // DIV2 is no-go
 
   readWord = 0x3FFF | 0x4000 | 0x8000;
   noOpWord = 0x0000 | 0x4000 | 0x8000;
@@ -36,6 +36,7 @@ void AS5047::readNow(){
   #else
     Readings.push(_reading);
   #endif
+
 }
 
 uint16_t AS5047::mostRecent(){
@@ -55,12 +56,13 @@ float AS5047::filtered(){
 
 uint32_t AS5047::filteredInt(){
   avgSumInt = 0;
+  
   noInterrupts();
   for(int i = 0; i < AS5047_AVERAGING; i++){
     avgSumInt += Readings.get(-i);
   }
   interrupts();
-  
+
   _filteredInt = avgSumInt / AS5047_AVERAGING;
   
   _offsetInt = _filteredInt + AS5047_OFFSET_UP;

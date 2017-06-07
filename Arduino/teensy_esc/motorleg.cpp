@@ -9,13 +9,16 @@ MotorLeg::MotorLeg(int pinHi, int pinLo){
 
   analogWriteFrequency(_pinHi, 187500); // pin, frequency
   analogWriteFrequency(_pinLo, 187500);
+
+  analogWrite(_pinHi, 0);
+  analogWrite(_pinLo, 0);
 }
 
 /*
  * set function should be hella fast
  */
 
-void MotorLeg::set(uint8_t duty, uint8_t dir){  // duty 0 - 255 : value checks happen outside of this f'n!
+void MotorLeg::set(uint8_t duty, int dir){  // duty 0 - 255 : value checks happen outside of this f'n!
                                         // dir 0, 1  
   if(dir > 0){ // 'electric direction' i.e. open-to-lo or open-to-hi ... never both
     analogWrite(_pinHi, duty);
@@ -40,6 +43,13 @@ void MotorLeg::setSVM(double dutyDir){ // -255 -> 255 (val & direction)
     this->kill();
   }
   this->assert();
+}
+
+void MotorLeg::report(){
+  Serial.print(" _duty: ");
+  Serial.print(_duty);
+  Serial.print(" _dir: ");
+  Serial.print(_dir);
 }
 
 void MotorLeg::assert(){

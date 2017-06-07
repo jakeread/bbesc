@@ -13,10 +13,11 @@ class MotorLeg{
   public:
   MotorLeg(int pinHi, int pinLo); // constructor
   //~MotorLeg(); // destructor, should have, don't
-  void set(uint8_t duty, uint8_t dir); // val, -255 <-> 255 (duty cycle, direction)
+  void set(uint8_t duty, int dir); // val, -255 <-> 255 (duty cycle, direction)
   void setSVM(double dutyDir);
   void assert();
   void kill();
+  void report();
 
   private:
   int _pinHi;

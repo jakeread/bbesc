@@ -16,9 +16,13 @@ SVM::SVM(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLoC)
   MLB = new MotorLeg(pinHiB, pinLoB);
   MLC = new MotorLeg(pinHiC, pinLoC);
 
-  _theta = 128;
+  _theta = 0;
   _duty = 0;
   _dir = 1;
+
+  _setValA = 0;
+  _setValB = 0;
+  _setValC = 0;
 }
 
 void SVM::init(){
@@ -63,9 +67,25 @@ void SVM::theta(double theta){  // theta, in radians
 }
 
 void SVM::assert(){
-  MLA->setSVM(_duty*cos(_theta)); // sets values between 
-  MLB->setSVM(_duty*cos(_theta - (TWO_PI)/3));
-  MLC->setSVM(_duty*cos(_theta + (TWO_PI)/3));
+  _setValA = _duty*cos(_theta); // sets values between 
+  _setValB = _duty*cos(_theta - (TWO_PI)/3);
+  _setValC = _duty*cos(_theta + (TWO_PI)/3);
+
+  MLA->setSVM(_setValA);
+  MLB->setSVM(_setValB);
+  MLC->setSVM(_setValC);
+}
+
+double SVM::getSetVal(int index){
+  if(index == 0){
+    return _setValA;
+  } else if(index == 1){
+    return _setValB;
+  } else if(index == 2){
+    return _setValC;
+  } else {
+    return 256; // which should be outside of bounds, indicating err
+  }
 }
 
 void SVM::commutate(double rads){ // com in -> rads
@@ -75,7 +95,6 @@ void SVM::commutate(double rads){ // com in -> rads
   } else if (_theta < 0){
     _theta += TWO_PI;
   }
-  this->assert();
 }
 
 double SVM::getTheta(){

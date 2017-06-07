@@ -22,6 +22,7 @@ class SVM{
   void assert();
   void commutate(double rads); // steps-from-current-angle to take, set
   double getTheta();
+  double getSetVal(int index);
 
   void loop(uint32_t pos);
 
@@ -34,6 +35,9 @@ class SVM{
   int _duty;
   int _dir;
   double _theta;
+  double _setValA;
+  double _setValB;
+  double _setValC;
   
   
 };
