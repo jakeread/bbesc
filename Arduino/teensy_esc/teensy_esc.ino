@@ -6,10 +6,11 @@
 #include "config.h"
 
 #define RUN_BLDC_DEBUG_LOOP     0
-#define RUN_SVM_DEBUG_LOOP      1
+#define RUN_SVM_DEBUG_LOOP      0
 #define RUN_ENCODER_LOOP        1
 #define RUN_SVM_LOOP            0
-#define RUN_BLDC_LOOP           0
+#define RUN_BLDC_LOOP           1
+#define IS_BBESC_GRINDER        1
 
 #if RUN_BLDC_DEBUG_LOOP || RUN_SVM_DEBUG_LOOP
   IntervalTimer Debug_Timer;
@@ -21,25 +22,23 @@
 #endif
 
 #if RUN_SVM_LOOP || RUN_SVM_DEBUG_LOOP
-  SVM TSVM(10, 9, 6, 5, 4, 3); // THESE IN A KERNEL : YES DO IT SOON
-  //SVM TSVM(3,4,5,6,9,10);
+  SVM TSVM(3,4,5,6,9,10);
+#endif
+
+#if RUN_SVM_LOOP
   IntervalTimer SVM_Timer;
 #endif
 
+#if RUN_BLDC_LOOP || RUN_BLDC_DEBUG_LOOP
+  BLDC TBLDC(3, 4, 5, 6, 9, 10);
+#endif
+
 #if RUN_BLDC_LOOP
-  BLDC TBLDC(10, 9, 6, 5, 4, 3);
   IntervalTimer BLDC_Timer;
 #endif
 
 
 void setup() {
-
-  pinMode(17, INPUT); // V_SENSE_A
-  pinMode(21, INPUT); // A_SENSE_A
-  pinMode(18, INPUT); // V_SENSE_B
-  pinMode(22, INPUT); // A_SENSE_B
-  pinMode(19, INPUT); // V_SENSE_C
-  pinMode(23, INPUT); // A_SENSE_C
   
   pinMode(13, OUTPUT);
 
@@ -60,6 +59,11 @@ void setup() {
 
   #if RUN_SVM_DEBUG_LOOP || RUN_BLDC_DEBUG_LOOP
     Debug_Timer.begin(Debug_Loop, 1000000/DEBUG_LOOP_HZ); 
+  #endif
+
+  #if IS_BBESC_GRINDER
+    pinMode(FWD_PIN, INPUT);
+    pinMode(REV_PIN, INPUT);
   #endif
 }
 
@@ -118,18 +122,6 @@ void Debug_Loop(){
     Serial.print("\tT:\t");
     Serial.print(thetaKeeper);
 
-    Serial.print("\tAV: ");
-    Serial.print(analogRead(17));
-    Serial.print("\tAA: ");
-    Serial.print(analogRead(21));
-    Serial.print("\tBV: ");
-    Serial.print(analogRead(18));
-    Serial.print("\tBA: ");
-    Serial.print(analogRead(22));
-    Serial.print("\tCV: ");
-    Serial.print(analogRead(19));
-    Serial.print("\tCA: ");
-    Serial.print(analogRead(23));
     /*
     Serial.print("\tsetValA:\t");
     Serial.print(TSVM.getSetVal(0));
@@ -162,50 +154,119 @@ void Debug_Loop(){
 
 // -------------------------------------------------------- BLDC LOOP
 #if RUN_BLDC_LOOP
-int controlInput = 0;
 
-void BLDC_Loop() {
+uint16_t dutyUser = 0; // what is threshold duty?
+uint16_t dutyDished = 0;
+uint16_t phaseAdvanceUser = 0;
+uint16_t phaseAdvanceDished = 0;
+uint16_t encoderFiltered = 0;
+uint16_t encoderModulod = 0;
+uint8_t currentCom = 0;
+bool dir = 0;
 
-  controlInput = analogRead(9);
+void BLDC_Loop(){
 
-  if (controlInput < 128) {
-    BLDC.dir(0);
-    BLDC.duty(map(controlInput, 128, 0, 0, 255));
-  } else if (controlInput >= 128) {
-    BLDC.dir(1);
-    BLDC.duty(map(controlInput, 128, 255, 0, 255));
+  digitalWrite(13, !digitalRead(13));
+
+  dutyUser = analogRead(9);
+  dutyDished = map(dutyUser,1024,0,110,255); 
+
+  phaseAdvanceUser = analogRead(8);
+  phaseAdvanceDished = map(phaseAdvanceUser, 0, 1024, 0, MOTOR_MODULO); // /6 ? not sure of this yet
+
+  if(!digitalRead(FWD_PIN)){
+    dir = 1;
+  } else if(!digitalRead(REV_PIN)){
+    dir = 0;
+  } else {
+    dutyDished = 0;
   }
+  
+  encoderFiltered = TAS5047.filteredInt();
+  encoderModulod = encoderFiltered % MOTOR_MODULO;
 
-  AS5047.readNow();
-  AS5047.filter();
+  TBLDC.dir(dir);
+  TBLDC.duty(dutyDished);
+  TBLDC.advance(phaseAdvanceDished); // 0 to disable // set default :: THIS NOT IMPLEMENTED
+  TBLDC.loop(encoderFiltered);       // NEEDS REWRITE
 
-  BLDC.loop((int)AS5047.filtered);
 }
+
 #endif
 // --------------------------------------------------------- FIN BLDC LOOP
 
 // --------------------------------------------------------- DEBUG LOOP
 #if RUN_BLDC_DEBUG_LOOP
 
-BLDC TBLDC(10, 9, 6, 5, 4, 3);
+// LOOP VARS
 
-int dblCounter = 0;
+uint16_t dutyUser = 0; // what is threshold duty?
+uint16_t dutyDished = 0;
+uint16_t phaseAdvanceUser = 0;
+uint16_t phaseAdvanceDished = 0;
+uint16_t encoderFiltered = 0;
+uint16_t encoderModulod = 0;
+uint8_t currentCom = 0;
+int dir = 0;
+
+int dblCounter = 0; // COM cycles should not have to be counted, should be determined directly from encoder modulo location (with phase advance?)
 uint16_t comCounter = 5;
-int comDivisor = 1;
+int comDivisor = 20;
 
 void Debug_Loop() {
 
   digitalWrite(13, !digitalRead(13));
 
-  TBLDC.duty(138);
+  dutyUser = analogRead(9);
+  dutyDished = map(dutyUser,1024,0,110,255); 
+
+  phaseAdvanceUser = analogRead(8);
+  phaseAdvanceDished = map(phaseAdvanceUser, 0, 1024, 0, MOTOR_MODULO); // /6 ? not sure of this yet
+
+
+  if(!digitalRead(FWD_PIN)){
+    dir = 1;
+  } else if(!digitalRead(REV_PIN)){
+    dir = -1;
+  } else {
+    dir = 0;
+    dutyDished = 0;
+  }
 
   if (dblCounter % comDivisor == 0) {
+
+    TBLDC.duty(dutyDished);
+
     comCounter ++;
-    Serial.println(""); // print 1st: i.e. at 'end' of last loop... so that spring has come out of motor
-    Serial.print(comCounter % 6);
     TBLDC.commutate(comCounter % 6);
-    Serial.print(", ");
-    Serial.println(TAS5047.filteredInt());
+
+    delay(1000);
+
+    for(int i = 0; i < AS5047_AVERAGING; i ++){
+      TAS5047.readNow();
+      delay(1);
+    }
+
+    encoderFiltered = TAS5047.filteredInt();
+    encoderModulod = encoderFiltered % MOTOR_MODULO;
+  
+    Serial.println(""); // print 1st: i.e. at 'end' of last loop... so that spring has come out of motor
+    Serial.print("DU:\t");
+    Serial.print(dutyUser);
+    Serial.print("\tDD:\t");
+    Serial.print(dutyDished);
+    Serial.print("\tPAU:\t");
+    Serial.print(phaseAdvanceUser);
+    Serial.print("\tPAD:\t");
+    Serial.print(phaseAdvanceDished);
+    Serial.print("\tDIR:\t");
+    Serial.print(dir);
+    Serial.print("\tEF:\t");
+    Serial.print(encoderFiltered);
+    Serial.print("\tEM:\t");
+    Serial.print(encoderModulod);
+    Serial.print("\tCOM:\t");
+    Serial.print(comCounter % 6);
   }
 
   dblCounter ++;
@@ -214,23 +275,6 @@ void Debug_Loop() {
 #endif
 
 // --------------------------------------------------------- FIN DEBUG LOOP
-
-// --------------------------------------------------------- HZ SVM UPDATE LOOP
-
-/*
-unsigned long nextFlip;
-unsigned long period;
-
-void HZ_Loop_SVM() {
-  
-  if(micros() >= nextFlip){
-    TSVM.duty(map(analogRead(9), 0, 1024, 0, 255));
-    TSVM.commutate(0.05);
-    period = map(analogRead(8), 0, 512, 0, 132096);
-    nextFlip = micros() + period;
-  }
-}
-*/
 
 void loop() { 
 }

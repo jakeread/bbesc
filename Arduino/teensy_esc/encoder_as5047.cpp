@@ -68,12 +68,19 @@ uint16_t AS5047::mostRecent(){
 
 float AS5047::filtered(){
   avgSumFloat = 0;
+  
   noInterrupts();
   for(int i = 0; i < AS5047_AVERAGING; i++){
     avgSumFloat += Readings.get(-i);
   }
   interrupts();
+  
   _filtered = avgSumFloat / AS5047_AVERAGING;
+
+  _offset = _filtered + AS5047_AVERAGING;
+  if(_offset > AS5047_RESOLUTION){
+    _offsetInt -= MOTOR_MODULO;
+  }
   return _filtered;
 }
 

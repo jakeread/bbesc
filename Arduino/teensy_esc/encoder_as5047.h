@@ -23,6 +23,7 @@ class AS5047 {
   uint8_t readingPosition;
   volatile float _filtered;
   volatile uint32_t _filteredInt;
+  volatile float _offset;
   volatile uint32_t _offsetInt;
   volatile uint16_t _reading;
   volatile uint16_t _pardCheckBits;

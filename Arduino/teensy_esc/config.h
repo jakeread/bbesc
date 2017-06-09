@@ -12,7 +12,7 @@
 
 #define RBUF_LENGTH 256
 
-#define AS5047_OFFSET_UP            0     // MT5208: 6663 = 6858 - 195 (offset - 1/2 switch phase)
+#define AS5047_OFFSET_UP            1395     
 #define AS5047_REV                  FALSE          // set TRUE to reverse values, 0 to retain original // MT4108 = FALSE
 
 
@@ -32,10 +32,17 @@
 
 #define AS5047_LOOP_HZ              60000
 #define SVM_LOOP_HZ                 30000
-#define DEBUG_LOOP_HZ               3000
+#define BLDC_LOOP_HZ                10000
+#define DEBUG_LOOP_HZ               60
+
 // SVM
 
 #define PHASE_ADVANCE               1.45 // RADIANS: optimum is 90*, or PI/2, or 1.57
 #define POS_TO_THETA                0.0042197349
+
+// BBESC_GRINDER
+
+#define FWD_PIN                     12
+#define REV_PIN                     11
 
 #endif

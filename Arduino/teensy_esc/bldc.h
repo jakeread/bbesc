@@ -19,14 +19,14 @@ class BLDC{
   void init();          // starts timers
   void duty(int duty);  // set rms pwm val
   void dir(bool dir);   // set direction for commutation
-  void freq(int freq);    // set commutation freq (updates timer)
+  void advance(int advance);    // set commutation freq (updates timer)
   void loop(uint16_t posNow);
   void commutate(uint8_t comPos);
 
   private:
   int _duty;
   int _dir; // -1 or 1
-  int _freq;
+  int _advance;
 
   int _comloc;
   unsigned long _lastcom;

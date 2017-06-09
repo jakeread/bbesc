@@ -14,7 +14,6 @@ BLDC::BLDC(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLo
 
   _duty = 125;
   _dir = 1;
-  _freq = 50000; // expressed as microseconds delay between commutation cycles
 
   _comloc = 0;
   _lastcom = micros();
@@ -32,10 +31,8 @@ void BLDC::dir(bool dir){
   _dir = dir;
 }
 
-void BLDC::freq(int freq){
-  _freq = freq;
-  // if as previous nothing
-  // else update timer
+void BLDC::advance(int advance){
+  _advance = advance;
 }
 
 
@@ -46,15 +43,6 @@ void BLDC::loop(uint16_t posNow){
    * Check comm table / simple math: where are we in comm table? encoder resolution / poles % 6 ?
    * Set PWM's according
    */
-
-  /*
-   * OFFSET and loop-back if over
-   */
-  _posNow = posNow;
-  _posNow -= AS5047_OFFSET_UP;
-  if(_posNow < 0){
-    _posNow += AS5047_RESOLUTION;
-  }
 
   /*
    * Do Modulo: for splitting Encoder (0-AS5047_RESOLUTION Physical Period, into 0-BLDC_MODULO Electrical Period)
