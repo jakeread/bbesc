@@ -160,7 +160,6 @@ uint16_t dutyDished = 0;
 uint16_t phaseAdvanceUser = 0;
 uint16_t phaseAdvanceDished = 0;
 uint16_t encoderFiltered = 0;
-uint16_t encoderModulod = 0;
 uint8_t currentCom = 0;
 bool dir = 0;
 
@@ -183,11 +182,10 @@ void BLDC_Loop(){
   }
   
   encoderFiltered = TAS5047.filteredInt();
-  encoderModulod = encoderFiltered % MOTOR_MODULO;
 
   TBLDC.dir(dir);
   TBLDC.duty(dutyDished);
-  TBLDC.advance(phaseAdvanceDished); // 0 to disable // set default :: THIS NOT IMPLEMENTED
+  //TBLDC.advance(phaseAdvanceDished); // 0 to disable // set default :: THIS NOT IMPLEMENTED
   TBLDC.loop(encoderFiltered);       // NEEDS REWRITE
 
 }
@@ -195,7 +193,7 @@ void BLDC_Loop(){
 #endif
 // --------------------------------------------------------- FIN BLDC LOOP
 
-// --------------------------------------------------------- DEBUG LOOP
+// --------------------------------------------------------- BLDC DEBUG LOOP
 #if RUN_BLDC_DEBUG_LOOP
 
 // LOOP VARS
@@ -274,7 +272,7 @@ void Debug_Loop() {
 }
 #endif
 
-// --------------------------------------------------------- FIN DEBUG LOOP
+// --------------------------------------------------------- FIN BLDC DEBUG LOOP
 
 void loop() { 
 }

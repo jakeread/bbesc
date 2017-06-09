@@ -12,7 +12,7 @@
 
 #define RBUF_LENGTH 256
 
-#define AS5047_OFFSET_UP            1395     
+#define AS5047_OFFSET_UP            1590 //1395           // MOTOR_MODULO - MeasuredAt0 + (0.5*(MOTOR_MODULO/6))
 #define AS5047_REV                  FALSE          // set TRUE to reverse values, 0 to retain original // MT4108 = FALSE
 
 
@@ -32,7 +32,7 @@
 
 #define AS5047_LOOP_HZ              60000
 #define SVM_LOOP_HZ                 30000
-#define BLDC_LOOP_HZ                10000
+#define BLDC_LOOP_HZ                25000
 #define DEBUG_LOOP_HZ               60
 
 // SVM

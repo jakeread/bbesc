@@ -17,10 +17,25 @@ BLDC::BLDC(int pinHiA, int pinLoA, int pinHiB, int pinLoB, int pinHiC, int pinLo
 
   _comloc = 0;
   _lastcom = micros();
+
+  for(int i = 0; i < 7; i ++){
+    _czc[i] = i*(MOTOR_MODULO / 6);
+  }
   
 }
 
 void BLDC::init(){
+}
+
+void BLDC::prntCzc(){
+  for(int i = 0; i < 7; i ++){
+    Serial.print("_czc");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(_czc[i]);
+    Serial.println(" ");
+  }
+  Serial.println(" ");
 }
 
 void BLDC::duty(int duty){
@@ -47,9 +62,12 @@ void BLDC::loop(uint16_t posNow){
   /*
    * Do Modulo: for splitting Encoder (0-AS5047_RESOLUTION Physical Period, into 0-BLDC_MODULO Electrical Period)
    */
+  _posNow = posNow;
+  
   _modulo = _posNow % MOTOR_MODULO;
 
   /*
+  
   Serial.print("Duty: ");
   Serial.print(_duty);
   Serial.print(" Dir: ");
@@ -59,23 +77,24 @@ void BLDC::loop(uint16_t posNow){
   Serial.print(_posNow);
   Serial.print(" Modulo: ");
   Serial.println(_modulo);
-  */
 
+  */
+  
   /* ENTER CONFIG
    *  Needs to update zone-values per pole-number
    */
 
-  if(_modulo >= 0 && _modulo < 248){
+  if(_modulo >= _czc[0] && _modulo < _czc[1]){
     _comZone = 0;
-  } else if (_modulo >= 248 && _modulo < 496){
+  } else if (_modulo >= _czc[1] && _modulo < _czc[2]){
     _comZone = 1;
-  } else if (_modulo >= 496 && _modulo < 745){
+  } else if (_modulo >= _czc[2] && _modulo < _czc[3]){
     _comZone = 2;
-  } else if (_modulo >= 745 && _modulo < 993){
+  } else if (_modulo >= _czc[3] && _modulo < _czc[4]){
     _comZone = 3;
-  } else if (_modulo >= 993 && _modulo < 1241){
+  } else if (_modulo >= _czc[4] && _modulo < _czc[5]){
     _comZone = 4;
-  } else if (_modulo >= 1241 && _modulo <= 1489){
+  } else if (_modulo >= _czc[5] && _modulo <= _czc[6]){
     _comZone = 5;
   }
 
@@ -92,6 +111,9 @@ void BLDC::loop(uint16_t posNow){
     if(_comCommand == 7){
       _comCommand = 1;
     }
+    if(_comCommand == 8){
+      _comCommand = 2;
+    }
   }
   
   if(_dir == 0){
@@ -101,6 +123,9 @@ void BLDC::loop(uint16_t posNow){
     }
     if(_comCommand == -2){
       _comCommand = 4;
+    }
+    if(_comCommand == -3){
+      _comCommand = 3;
     }
   }
 

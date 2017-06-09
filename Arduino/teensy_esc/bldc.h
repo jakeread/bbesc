@@ -23,6 +23,8 @@ class BLDC{
   void loop(uint16_t posNow);
   void commutate(uint8_t comPos);
 
+  void prntCzc();
+
   private:
   int _duty;
   int _dir; // -1 or 1
@@ -30,6 +32,8 @@ class BLDC{
 
   int _comloc;
   unsigned long _lastcom;
+
+  uint16_t _czc[7]; // comZoneCaps
 
   int _modulo;
   int _posNow;
